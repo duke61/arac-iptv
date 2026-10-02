@@ -211,10 +211,12 @@
 
         .loading-spinner {
             display: none;
-            color: var(--accent-color);
-            font-size: 1.2rem;
+            color: #ffcc00;
+            font-size: 1rem;
             text-align: center;
-            padding: 20px;
+            padding: 15px;
+            margin-top: 10px;
+            line-height: 1.4;
         }
 
         .hidden {
@@ -238,7 +240,7 @@
         <form id="m3uForm" onsubmit="handleM3uSubmit(event)">
             <div class="form-group">
                 <label for="m3uUrl">M3U / M3U8 Playlist URL Adresi</label>
-                <input type="url" id="m3uUrl" placeholder="https://ornek.com/playlist.m3u" required>
+                <input type="url" id="m3uUrl" placeholder="http://sunucu-adresi.com/get.php?..." required>
             </div>
             <button type="submit" class="btn-submit">Kanalları Yükle</button>
         </form>
@@ -259,7 +261,7 @@
             <button type="submit" class="btn-submit">Giriş Yap ve Yükle</button>
         </form>
 
-        <div id="loadingText" class="loading-spinner">Oynatma listesi yükleniyor, lütfen bekleyin...</div>
+        <div id="loadingText" class="loading-spinner">Yayın listesi çekiliyor, lütfen bekleyin...</div>
     </div>
 
     <div class="app-container" id="appScreen">
@@ -327,37 +329,75 @@
             loadPlaylist(m3uUrl);
         }
 
-        function fetchPlaylistWithCorsProxy(targetUrl) {
-            return new Promise((resolve, reject) => {
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-                
-                fetch(proxyUrl)
-                    .then(response => {
-                        if (response.ok) return response.json();
-                        throw new Error('Proxy sunucu yanıt vermedi.');
-                    })
-                    .then(data => {
-                        if (data.contents) {
-                            resolve(data.contents);
-                        } else {
-                            reject(new Error('Playlist verisi alınamadı.'));
+        // Birden fazla yedek proxy servisi ile istek atma fonksiyonu
+        async function fetchWithFallbackProxies(targetUrl) {
+            const updateStatus = (msg) => {
+                const el = document.getElementById('loadingText');
+                if (el) el.innerText = msg;
+            };
+
+            // 1. Doğrudan Bağlantı Denemesi
+            try {
+                updateStatus("Sunucuya doğrudan bağlanılıyor...");
+                const response = await fetch(targetUrl);
+                if (response.ok) {
+                    return await response.text();
+                }
+            } catch (e) {
+                console.log("Doğrudan bağlantı başarısız, proxy deneniyor...");
+            }
+
+            // 2. Proxy Servisleri Sırasıyla Denenir
+            const proxies = [
+                {
+                    name: "AllOrigins",
+                    url: (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+                    parse: async (res) => {
+                        const json = await res.json();
+                        return json.contents;
+                    }
+                },
+                {
+                    name: "CorsProxy.io",
+                    url: (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+                    parse: async (res) => await res.text()
+                },
+                {
+                    name: "ThingProxy",
+                    url: (u) => `https://thingproxy.freeboard.io/fetch/${u}`,
+                    parse: async (res) => await res.text()
+                }
+            ];
+
+            for (const proxy of proxies) {
+                try {
+                    updateStatus(`${proxy.name} üzerinden liste çekiliyor...`);
+                    const res = await fetch(proxy.url(targetUrl));
+                    if (res.ok) {
+                        const content = await proxy.parse(res);
+                        if (content && content.length > 50) {
+                            return content;
                         }
-                    })
-                    .catch(err => reject(err));
-            });
+                    }
+                } catch (err) {
+                    console.warn(`${proxy.name} bağlantısı başarısız oldu:`, err);
+                }
+            }
+
+            throw new Error("Tüm proxy bağlantıları başarısız oldu. Sunucunuz erişilemiyor olabilir veya üyelik bilgileriniz hatalı.");
         }
 
         async function loadPlaylist(url) {
             showLoading(true);
             try {
-                const text = await fetchPlaylistWithCorsProxy(url);
+                const text = await fetchWithFallbackProxies(url);
                 parseM3U(text);
 
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').style.display = 'flex';
                 document.getElementById('resetBtn').classList.remove('hidden');
             } catch (err) {
-                alert('Yayın listesi yüklenirken hata oluştu!\nHata: ' + err.message);
+                alert('Yayın listesi yüklenirken hata oluştu!\n' + err.message);
             } finally {
                 showLoading(false);
             }
