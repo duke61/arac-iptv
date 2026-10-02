@@ -4,45 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Web IPTV Player</title>
-    
-    <!-- Modern Google Fontları -->
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Video.js Modern Oynatıcı Kurulumu -->
-    <link href="https://zencdn.net" rel="stylesheet" />
-    <script src="https://zencdn.net"></script>
-
     <style>
-        :root {
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --bg-input: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent-blue: #3b82f6;
-            --accent-green: #10b981;
-            --danger: #ef4444;
-        }
-
+        /* DIŞ BAĞIMLILIĞI OLMAYAN SAF CSS TASARIMI */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
-            scrollbar-width: thin;
-            scrollbar-color: #475569 #1e293b;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
+            background-color: #0f172a;
+            color: #f8fafc;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
         }
 
         .container {
@@ -55,50 +32,48 @@
 
         header {
             text-align: center;
-            margin-bottom: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #1e293b;
         }
 
         header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #3b82f6, #10b981);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 24px;
+            color: #3b82f6;
+            margin-bottom: 5px;
         }
 
         header p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: 5px;
+            color: #94a3b8;
+            font-size: 14px;
         }
 
-        /* Giriş Panelleri */
-        .login-grid {
+        /* Giriş Formları */
+        .forms-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
         }
 
         @media (min-width: 768px) {
-            .login-grid { grid-template-columns: 1fr 1fr; }
+            .forms-grid { grid-template-columns: 1fr 1fr; }
         }
 
         .card {
-            background-color: var(--bg-card);
-            border: 1px solid #2e3e56;
+            background-color: #1e293b;
+            border: 1px solid #334155;
             border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
         }
 
         .card h2 {
-            font-size: 1.2rem;
+            font-size: 16px;
+            margin-bottom: 15px;
             font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
+
+        .m3u-title { color: #60a5fa; }
+        .xtream-title { color: #34d399; }
 
         .form-group {
             margin-bottom: 12px;
@@ -112,28 +87,25 @@
 
         label {
             display: block;
-            font-size: 0.75rem;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            margin-bottom: 6px;
         }
 
         input {
             width: 100%;
-            background-color: var(--bg-input);
+            background-color: #0f172a;
             border: 1px solid #475569;
-            color: var(--text-main);
-            padding: 10px 14px;
+            color: #fff;
+            padding: 10px;
             border-radius: 6px;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            font-size: 13px;
         }
 
         input:focus {
             outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
         }
 
         button {
@@ -142,141 +114,129 @@
             border: none;
             border-radius: 6px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 13px;
             cursor: pointer;
-            transition: background 0.2s;
             color: white;
+            transition: opacity 0.2s;
             margin-top: 5px;
         }
 
-        .btn-blue { background-color: var(--accent-blue); }
-        .btn-blue:hover { background-color: #2563eb; }
-        .btn-green { background-color: var(--accent-green); }
-        .btn-green:hover { background-color: #059669; }
+        button:hover { opacity: 0.9; }
+        .btn-blue { background-color: #2563eb; }
+        .btn-green { background-color: #059669; }
 
-        /* Bildirim Çubuğu */
-        .status-bar {
+        /* Durum Bildirimi */
+        .status-box {
             padding: 12px;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 13px;
             text-align: center;
             display: none;
-            border: 1px solid transparent;
+            background-color: #1e293b;
+            border: 1px solid #3b82f6;
+            color: #93c5fd;
         }
-        .status-info { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border-color: rgba(59, 130, 246, 0.3); }
-        .status-error { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
 
-        /* Ana Oynatıcı Alanı */
-        .main-grid {
+        /* Oynatıcı Paneli */
+        .main-layout {
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
         }
 
         @media (min-width: 1024px) {
-            .main-grid { grid-template-columns: 2fr 1fr; }
+            .main-layout { grid-template-columns: 2fr 1fr; }
         }
 
-        .player-wrapper {
-            background-color: black;
+        .player-container {
+            background-color: #000;
             border-radius: 12px;
             overflow: hidden;
+            border: 1px solid #334155;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-            border: 1px solid #2e3e56;
         }
 
-        .video-js {
-            width: 100% !important;
-            height: 480px !important;
+        video {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
         }
 
-        @media (max-width: 768px) {
-            .video-js { height: 260px !important; }
-        }
-
-        .track-info {
-            background-color: var(--bg-card);
+        .player-footer {
+            background-color: #1e293b;
             padding: 15px;
-            font-size: 0.95rem;
-            border-top: 1px solid #2e3e56;
-            font-weight: 500;
+            font-size: 14px;
+            border-top: 1px solid #334155;
         }
 
-        /* Sağ Liste Alanı */
-        .list-wrapper {
-            background-color: var(--bg-card);
-            border: 1px solid #2e3e56;
+        /* Sağ Kanal Listesi */
+        .sidebar {
+            background-color: #1e293b;
+            border: 1px solid #334155;
             border-radius: 12px;
-            padding: 16px;
-            height: 540px;
+            padding: 15px;
+            height: 500px;
             display: flex;
             flex-direction: column;
         }
 
-        .list-header {
+        .sidebar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
-        .badge {
-            background-color: var(--bg-input);
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
+        .count-badge {
+            background-color: #334155;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #cbd5e1;
         }
 
-        .search-box {
-            margin-bottom: 12px;
-        }
-
-        .channel-container {
+        .list-scroller {
             flex: 1;
             overflow-y: auto;
+            margin-top: 10px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            padding-right: 4px;
+            gap: 5px;
         }
 
-        .channel-item {
+        .channel-btn {
             width: 100%;
             text-align: left;
-            background: rgba(255, 255, 255, 0.03);
+            background-color: rgba(255, 255, 255, 0.03);
             border: 1px solid transparent;
-            padding: 10px 14px;
+            padding: 10px;
             border-radius: 6px;
             color: #cbd5e1;
-            font-size: 0.85rem;
+            font-size: 13px;
             cursor: pointer;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            transition: all 0.15s;
         }
 
-        .channel-item:hover {
-            background: rgba(5b, 130, 246, 0.1);
-            border-color: rgba(59, 130, 246, 0.3);
+        .channel-btn:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
             color: #fff;
-            transform: translateX(2px);
         }
 
-        .channel-item.active {
-            background: var(--accent-blue);
-            color: white;
-            font-weight: 600;
+        .channel-btn.active {
+            background-color: #2563eb;
+            color: #fff;
+            font-weight: bold;
         }
 
-        .empty-state {
+        .no-data {
             text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: 40px;
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -285,50 +245,96 @@
     <div class="container">
         <header>
             <h1>📺 Premium Web IPTV Player</h1>
-            <p>Listenizi girin ve donmadan web tarayıcınızdan izleyin</p>
+            <p>Bilgilerinizi girin, listeniz sağ tarafta anında listelensin.</p>
         </header>
 
-        <!-- Giriş Bölümleri -->
-        <div class="login-grid">
-            <!-- M3U Form -->
+        <!-- Form Alanları -->
+        <div class="forms-grid">
+            <!-- M3U List -->
             <div class="card">
-                <h2 style="color: var(--accent-blue);">🔗 M3U Playlist</h2>
+                <h2 class="m3u-title">🔗 M3U / M3U8 Playlist</h2>
                 <div class="form-group">
-                    <label>M3U / M3U8 Bağlantı Adresi</label>
-                    <input type="text" id="m3uUrl" placeholder="https://example.com">
+                    <label>Oynatma Listesi URL</label>
+                    <input type="text" id="inputM3u" placeholder="https://site.com">
                 </div>
-                <button class="btn-blue" onclick="loadM3U()">Kanalları Yükle</button>
+                <button class="btn-blue" onclick="handleM3U()">Kanalları Yükle</button>
             </div>
 
-            <!-- Xtream Form -->
+            <!-- Xtream API -->
             <div class="card">
-                <h2 style="color: var(--accent-green);">🔐 Xtream API</h2>
+                <h2 class="xtream-title">🔐 Xtream API Girişi</h2>
                 <div class="form-group">
                     <label>Sunucu URL (Host)</label>
-                    <input type="text" id="xtreamHost" placeholder="http://sunucuadresi.com:8080">
+                    <input type="text" id="inputHost" placeholder="http://sunucuadresi.com:8080">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Kullanıcı Adı</label>
-                        <input type="text" id="xtreamUser" placeholder="Kullanıcı adı">
+                        <input type="text" id="inputUser" placeholder="Username">
                     </div>
                     <div class="form-group">
                         <label>Şifre</label>
-                        <input type="password" id="xtreamPass" placeholder="Şifre">
+                        <input type="password" id="inputPass" placeholder="Password">
                     </div>
                 </div>
-                <button class="btn-green" onclick="loadXtream()">Giriş Yap ve Yükle</button>
+                <button class="btn-green" onclick="handleXtream()">Giriş Yap ve Yükle</button>
             </div>
         </div>
 
-        <!-- Bildirim Alanı -->
-        <div id="statusBar" class="status-bar"></div>
+        <!-- Durum Çubuğu -->
+        <div id="statusNotification" class="status-box"></div>
 
-        <!-- İzleme Alanı -->
-        <div class="main-grid">
-            <!-- Sol Oynatıcı -->
-            <div class="player-wrapper">
-                <video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto">
-                    <p class="vjs-no-js">Lütfen tarayıcınızda JavaScript'i aktifleştirin.</p>
-                </video>
-                <div class="track-info" id="currentTrack">
+        <!-- Oynatma ve Liste Düzeni -->
+        <div class="main-layout">
+            <!-- Sol Video Oynatıcı -->
+            <div class="player-container">
+                <video id="webPlayer" controls></video>
+                <div class="player-footer" id="nowPlaying">
+                    Oynatılan Kanal: <span style="color: #60a5fa;">Henüz Seçilmedi</span>
+                </div>
+            </div>
+
+            <!-- Sağ Liste -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h3>Kanal Listesi</h3>
+                    <span class="count-badge" id="totalChannels">0 Kanal</span>
+                </div>
+                <input type="text" id="searchBar" oninput="searchChannels()" placeholder="Kanal ara..." style="margin-top:5px;">
+                <div class="list-scroller" id="boxChannels">
+                    <div class="no-data">Lütfen listenizi yükleyin.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let globalChannels = [];
+        const videoElement = document.getElementById('webPlayer');
+
+        function updateStatus(text, isError = false) {
+            const box = document.getElementById('statusNotification');
+            box.innerText = text;
+            box.style.display = 'block';
+            box.style.borderColor = isError ? '#ef4444' : '#3b82f6';
+            box.style.color = isError ? '#fca5a5' : '#93c5fd';
+        }
+
+        // M3U Yükleme İşlemi
+        async function handleM3U() {
+            const targetUrl = document.getElementById('inputM3u').value.trim();
+            if (!targetUrl) return alert('Lütfen geçerli bir URL girin.');
+
+            updateStatus('Liste indiriliyor, lütfen bekleyin...');
+
+            try {
+                // Tarayıcı kısıtlamalarını (CORS) aşmak için doğrudan allorigins proxy yapısı kullanılıyor
+                const proxyUrl = `https://allorigins.win{encodeURIComponent(targetUrl)}`;
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                
+                if (data.contents) {
+                    processM3UData(data.contents);
+                } else {
+                    throw new Error('İçerik boş.');
+                }
