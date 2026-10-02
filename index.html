@@ -260,7 +260,7 @@
             <button type="submit" class="btn-submit">Giriş Yap ve Yükle</button>
         </form>
 
-        <div id="loadingText" class="loading-spinner">Yayın listesi indiriliyor...</div>
+        <div id="loadingText" class="loading-spinner">Yayın listesi çekiliyor...</div>
     </div>
 
     <div class="app-container" id="appScreen">
@@ -328,21 +328,34 @@
             loadPlaylist(m3uUrl);
         }
 
-        async function fetchPlaylist(targetUrl) {
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-            const res = await fetch(proxyUrl);
-            if (!res.ok) throw new Error("Veri indirilemedi.");
-            return await res.text();
+        async function fetchPlaylistData(targetUrl) {
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+            ];
+
+            for (const proxy of proxies) {
+                try {
+                    const res = await fetch(proxy);
+                    if (res.ok) {
+                        const text = await res.text();
+                        if (text && text.includes('#EXTM3U')) return text;
+                    }
+                } catch (e) {
+                    console.warn("Proxy hatası:", e);
+                }
+            }
+            throw new Error("M3U verisi çekilemedi.");
         }
 
         async function loadPlaylist(url) {
             showLoading(true);
             try {
-                const text = await fetchPlaylist(url);
+                const text = await fetchPlaylistData(url);
                 parseM3U(text);
 
                 if (channels.length === 0) {
-                    alert("Yayın listesi çekildi fakat içinde kanal bulunamadı. Lütfen giriş bilgilerinizi kontrol edin.");
+                    alert("Kanal bulunamadı veya liste biçimi okunamadı.");
                     logout();
                     return;
                 }
@@ -351,7 +364,7 @@
                 document.getElementById('appScreen').style.display = 'flex';
                 document.getElementById('resetBtn').classList.remove('hidden');
             } catch (err) {
-                alert("Liste yüklenirken hata oluştu: " + err.message);
+                alert("Yükleme hatası: " + err.message);
                 logout();
             } finally {
                 showLoading(false);
@@ -362,24 +375,18 @@
             channels = [];
             if (!content) return;
 
-            // Satır sonu karakterlerini standartlaştır
-            const lines = content.replace(/\r/g, '').split('\n');
+            const lines = content.split('\n');
             let currentName = '';
 
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
                 
                 if (line.startsWith('#EXTINF:')) {
-                    // Virgül sonrasındaki kanal adını al
-                    const commaIdx = line.lastIndexOf(',');
-                    if (commaIdx !== -1) {
-                        currentName = line.substring(commaIdx + 1).trim();
-                    } else {
-                        currentName = 'Kanal ' + (channels.length + 1);
-                    }
+                    const parts = line.split(',');
+                    currentName = parts[parts.length - 1].trim();
                 } else if (line.length > 0 && !line.startsWith('#')) {
                     channels.push({
-                        name: currentName || ('Kanal ' + (channels.length + 1)),
+                        name: currentName || 'Kanal ' + (channels.length + 1),
                         url: line
                     });
                     currentName = '';
@@ -408,7 +415,7 @@
 
         function playChannel(url, element) {
             document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
-            if(element) element.classList.add('active');
+            if (element) element.classList.add('active');
 
             const video = document.getElementById('videoPlayer');
 
