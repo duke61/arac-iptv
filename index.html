@@ -2,482 +2,187 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Araç Web IPTV Player</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web IPTV Player</title>
+    <!-- Tailwind CSS (Arayüz tasarımı için) -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- Video.js (HLS/M3U8 oynatabilen modern video oynatıcı) -->
+    <link href="https://zencdn.net" rel="stylesheet" />
+    <script src="https://zencdn.net"></script>
     <style>
-        :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --accent-color: #e50914;
-            --text-color: #ffffff;
-            --text-muted: #aaaaaa;
-            --border-color: #333333;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
-
-        header {
-            background-color: var(--card-bg);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        header h1 {
-            font-size: 1.4rem;
-            color: var(--accent-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-reset {
-            background-color: #333;
-            color: var(--text-color);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .login-container {
-            max-width: 500px;
-            margin: 40px auto;
-            padding: 20px;
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            width: 90%;
-        }
-
-        .tab-buttons {
-            display: flex;
-            margin-bottom: 20px;
-            gap: 10px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            background-color: #2a2a2a;
-            border: none;
-            color: var(--text-color);
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        .tab-btn.active {
-            background-color: var(--accent-color);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px;
-            background-color: #2a2a2a;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1rem;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .app-container {
-            display: none;
-            flex-direction: column;
-            flex: 1;
-        }
-
-        @media (min-width: 850px) {
-            .app-container {
-                flex-direction: row;
-                height: calc(100vh - 60px);
-            }
-        }
-
-        .player-section {
-            flex: 2;
-            background-color: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            min-height: 250px;
-        }
-
-        video {
-            width: 100%;
-            max-height: 70vh;
-            outline: none;
-        }
-
-        .playlist-section {
-            flex: 1;
-            background-color: var(--card-bg);
-            display: flex;
-            flex-direction: column;
-            border-left: 1px solid var(--border-color);
-            max-height: 500px;
-        }
-
-        @media (min-width: 850px) {
-            .playlist-section {
-                max-height: 100%;
-            }
-        }
-
-        .search-box {
-            padding: 12px;
-            background-color: #1a1a1a;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 12px;
-            background-color: #2a2a2a;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1rem;
-        }
-
-        .channel-list {
-            flex: 1;
-            overflow-y: auto;
-            list-style: none;
-        }
-
-        .channel-item {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .channel-item:active, .channel-item.active {
-            background-color: var(--accent-color);
-            color: #fff;
-        }
-
-        .loading-spinner {
-            display: none;
-            color: #ffcc00;
-            font-size: 1rem;
-            text-align: center;
-            padding: 15px;
-            margin-top: 10px;
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        .video-js { width: 100% !important; height: 500px !important; }
+        @media (max-width: 768px) { .video-js { height: 250px !important; } }
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 font-sans">
 
-    <header>
-        <h1>📺 Auto IPTV</h1>
-        <button class="btn-reset hidden" id="resetBtn" onclick="logout()">Çıkış Yap</button>
-    </header>
+    <div class="container mx-auto p-4 max-w-6xl">
+        <header class="text-center my-6">
+            <h1 class="text-3xl font-bold text-blue-500">📺 Web IPTV Player</h1>
+            <p class="text-gray-400 text-sm mt-1">Xtream API veya M3U ile anında izleyin</p>
+        </header>
 
-    <div class="login-container" id="loginScreen">
-        <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchTab('m3u')">M3U Linki</button>
-            <button class="tab-btn" onclick="switchTab('xtream')">Xtream API</button>
+        <!-- GİRİŞ FORMLARI -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            
+            <!-- M3U Girişi -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                <h2 class="text-xl font-semibold mb-4 text-blue-400">🔗 M3U / M3U8 Oynatma Listesi</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">M3U Playlist URL</label>
+                        <input type="text" id="m3uUrl" placeholder="https://example.com" class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button onclick="loadM3U()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium p-2 rounded text-sm transition">Kanalları Yükle</button>
+                </div>
+            </div>
+
+            <!-- Xtream API Girişi -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                <h2 class="text-xl font-semibold mb-4 text-emerald-400">🔐 Xtream API Girişi</h2>
+                <div class="grid grid-cols-1 gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Sunucu URL (Host)</label>
+                        <input type="text" id="xtreamHost" placeholder="http://sunucuadresi.com:8080" class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Kullanıcı Adı</label>
+                            <input type="text" id="xtreamUser" placeholder="Username" class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Şifre</label>
+                            <input type="password" id="xtreamPass" placeholder="Password" class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+                    <button onclick="loadXtream()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-2 rounded text-sm transition mt-1">Giriş Yap ve Yükle</button>
+                </div>
+            </div>
+
         </div>
 
-        <form id="m3uForm" onsubmit="handleM3uSubmit(event)">
-            <div class="form-group">
-                <label for="m3uUrl">M3U / M3U8 Playlist URL Adresi</label>
-                <input type="url" id="m3uUrl" placeholder="http://sunucu.com/get.php?..." required>
-            </div>
-            <button type="submit" class="btn-submit">Kanalları Yükle</button>
-        </form>
+        <!-- DURUM VE OYNATICI ALANI -->
+        <div id="statusMessage" class="hidden text-center p-3 my-4 bg-yellow-900/50 text-yellow-300 border border-yellow-700 rounded text-sm"></div>
 
-        <form id="xtreamForm" class="hidden" onsubmit="handleXtreamSubmit(event)">
-            <div class="form-group">
-                <label for="xtreamHost">Sunucu URL (Host)</label>
-                <input type="text" id="xtreamHost" placeholder="http://sunucu.com:8080" required>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Video Oynatıcı -->
+            <div class="lg:col-span-2 bg-black rounded-lg overflow-hidden shadow-2xl flex flex-col justify-center">
+                <video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" data-setup="{}">
+                    <p class="vjs-no-js">Video oynatmak için JavaScript'i etkinleştirmeniz gerekir.</p>
+                </video>
+                <div id="currentTrack" class="bg-gray-800 p-3 text-sm font-medium border-t border-gray-700 text-gray-300">
+                    Oynatılan Kanal: <span class="text-blue-400">Henüz kanal seçilmedi</span>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="xtreamUser">Kullanıcı Adı</label>
-                <input type="text" id="xtreamUser" placeholder="Kullanıcı Adı" required>
-            </div>
-            <div class="form-group">
-                <label for="xtreamPass">Şifre</label>
-                <input type="password" id="xtreamPass" placeholder="Şifre" required>
-            </div>
-            <button type="submit" class="btn-submit">Giriş Yap ve Yükle</button>
-        </form>
 
-        <div id="loadingText" class="loading-spinner">Bağlantı kuruluyor, kanallar çekiliyor...</div>
-    </div>
-
-    <div class="app-container" id="appScreen">
-        <div class="player-section">
-            <video id="videoPlayer" controls autoplay playsinline></video>
-        </div>
-        <div class="playlist-section">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 Kanal Ara..." oninput="filterChannels()">
+            <!-- Kanal Listesi -->
+            <div class="bg-gray-800 rounded-lg p-4 border border-gray-700 h-[550px] flex flex-col">
+                <h3 class="text-lg font-semibold mb-2 flex justify-between items-center text-gray-300">
+                    <span>📺 Kanal Listesi</span>
+                    <span id="channelCount" class="text-xs bg-gray-700 px-2 py-1 rounded text-gray-400">0 Kanal</span>
+                </h3>
+                <input type="text" id="searchChannel" oninput="filterChannels()" placeholder="Kanal ara..." class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm mb-3 focus:outline-none">
+                
+                <div id="channelList" class="overflow-y-auto flex-1 space-y-1 pr-1 text-sm scrollbar-thin scrollbar-thumb-gray-600">
+                    <p class="text-gray-500 text-center mt-10">Lütfen yukarıdan listenizi yükleyin.</p>
+                </div>
             </div>
-            <ul class="channel-list" id="channelList"></ul>
         </div>
     </div>
 
     <script>
-        let channels = [];
-        let hls = null;
+        let allChannels = [];
+        let player = videojs('my-video');
 
-        window.onload = () => {
-            const savedData = localStorage.getItem('iptv_credentials');
-            if (savedData) {
-                const creds = JSON.parse(savedData);
-                if (creds.type === 'xtream') {
-                    fetchChannels(buildXtreamM3uUrl(creds.host, creds.user, creds.pass));
-                } else {
-                    fetchChannels(creds.url);
-                }
-            }
-        };
-
-        function switchTab(tab) {
-            const tabs = document.querySelectorAll('.tab-btn');
-            tabs.forEach(t => t.classList.remove('active'));
-            
-            if (tab === 'm3u') {
-                tabs[0].classList.add('active');
-                document.getElementById('m3uForm').classList.remove('hidden');
-                document.getElementById('xtreamForm').classList.add('hidden');
-            } else {
-                tabs[1].classList.add('active');
-                document.getElementById('m3uForm').classList.add('hidden');
-                document.getElementById('xtreamForm').classList.remove('hidden');
-            }
+        function showStatus(msg, isError = false) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.innerText = msg;
+            statusEl.className = `text-center p-3 my-4 rounded text-sm ${isError ? 'bg-red-900/50 text-red-300 border border-red-700' : 'bg-blue-900/50 text-blue-300 border border-blue-700'}`;
+            statusEl.classList.remove('hidden');
         }
 
-        function buildXtreamM3uUrl(host, user, pass) {
-            if (!host.startsWith('http://') && !host.startsWith('https://')) {
-                host = 'http://' + host;
-            }
-            if (host.endsWith('/')) {
-                host = host.slice(0, -1);
-            }
-            return `${host}/get.php?username=${user}&password=${pass}&type=m3u_plus&output=m3u8`;
-        }
-
-        function handleM3uSubmit(e) {
-            e.preventDefault();
+        // M3U Yükleme Fonksiyonu
+        async function loadM3U() {
             const url = document.getElementById('m3uUrl').value.trim();
-            if (url) {
-                localStorage.setItem('iptv_credentials', JSON.stringify({ type: 'm3u', url: url }));
-                fetchChannels(url);
-            }
-        }
-
-        function handleXtreamSubmit(e) {
-            e.preventDefault();
-            const host = document.getElementById('xtreamHost').value.trim();
-            const user = document.getElementById('xtreamUser').value.trim();
-            const pass = document.getElementById('xtreamPass').value.trim();
-
-            const targetUrl = buildXtreamM3uUrl(host, user, pass);
-            localStorage.setItem('iptv_credentials', JSON.stringify({ type: 'xtream', host, user, pass }));
-            fetchChannels(targetUrl);
-        }
-
-        async function fetchWithProxies(targetUrl) {
-            const proxyList = [
-                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                (url) => `https://thingproxy.freeboard.io/fetch/${url}`
-            ];
-
-            for (const getProxyUrl of proxyList) {
-                try {
-                    const proxyUrl = getProxyUrl(targetUrl);
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 sn zaman aşımı
-
-                    const response = await fetch(proxyUrl, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-
-                    if (response.ok) {
-                        const text = await response.text();
-                        if (text && (text.includes('#EXTM3U') || text.includes('#EXTINF'))) {
-                            return text;
-                        }
-                    }
-                } catch (err) {
-                    console.warn("Proxy denemesi başarısız, sonraki deneniyor...", err);
-                }
-            }
-            throw new Error("Sunucuya erişilemedi. Lütfen bağlantı bilgilerinizi veya internetinizi kontrol edin.");
-        }
-
-        async function fetchChannels(targetUrl) {
-            showLoading(true);
+            if (!url) return alert('Lütfen geçerli bir M3U linki girin!');
+            
+            showStatus('Oynatma listesi yükleniyor, lütfen bekleyin...');
+            
             try {
-                const m3uText = await fetchWithProxies(targetUrl);
-                parseM3U(m3uText);
-
-                if (channels.length === 0) {
-                    throw new Error("Veri çekildi ancak listede kanal bulunamadı.");
+                // CORS engeline takılmamak için proxy kullanma ihtimaline karşın doğrudan fetch denenir
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Ağ yanıtı düzgün değil.');
+                const text = await response.text();
+                parseM3U(text);
+            } catch (error) {
+                console.error(error);
+                showStatus('Doğrudan erişim engellendi (CORS). Herkese açık bir CORS proxy kullanılarak tekrar deneniyor...');
+                try {
+                    const proxyUrl = `https://allorigins.win{encodeURIComponent(url)}`;
+                    const proxyResp = await fetch(proxyUrl);
+                    const proxyData = await proxyResp.json();
+                    parseM3U(proxyData.contents);
+                } catch (proxyError) {
+                    showStatus('Kanal listesi yüklenemedi. Linkin doğruluğundan veya CORS izinlerinden emin olun.', true);
                 }
-
-                showAppScreen();
-            } catch (err) {
-                alert("Yükleme Hatası: " + err.message);
-                logout();
-            } finally {
-                showLoading(false);
             }
         }
 
-        function parseM3U(content) {
-            channels = [];
-            if (!content) return;
-
-            const lines = content.split('\n');
+        // M3U Ayrıştırıcı (Basit)
+        function parseM3U(data) {
+            allChannels = [];
+            const lines = data.split('\n');
             let currentName = '';
 
             for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                
+                const line = lines[i].trim();
                 if (line.startsWith('#EXTINF:')) {
-                    const commaIndex = line.lastIndexOf(',');
-                    if (commaIndex !== -1) {
-                        currentName = line.substring(commaIndex + 1).trim();
-                    } else {
-                        currentName = 'Kanal ' + (channels.length + 1);
+                    // Kanal ismini yakala
+                    const parts = line.split(',');
+                    currentName = parts[parts.length - 1] || 'Bilinmeyen Kanal';
+                } else if (line && !line.startsWith('#')) {
+                    if (currentName) {
+                        allChannels.push({ name: currentName, url: line });
+                        currentName = '';
                     }
-                } else if (line.length > 0 && !line.startsWith('#')) {
-                    channels.push({
-                        name: currentName || ('Kanal ' + (channels.length + 1)),
-                        url: line
-                    });
-                    currentName = '';
                 }
             }
-            renderChannels(channels);
+            renderChannels();
         }
 
-        function renderChannels(items) {
-            const listEl = document.getElementById('channelList');
-            listEl.innerHTML = '';
+        // Xtream API Yükleme Fonksiyonu
+        async function loadXtream() {
+            let host = document.getElementById('xtreamHost').value.trim();
+            const user = document.getElementById('xtreamUser').value.trim();
+            const pass = document.getElementById('xtreamPass').value.trim();
 
-            if (items.length === 0) {
-                listEl.innerHTML = '<li class="channel-item">Kanal bulunamadı.</li>';
+            if (!host || !user || !pass) return alert('Lütfen tüm Xtream bilgilerini doldurun!');
+            if (!host.startsWith('http')) host = 'http://' + host;
+
+            showStatus('Xtream API bağlantısı kuruluyor...');
+            
+            // Xtream formatında canlı yayınların m3u çıktısını alma URL'i
+            const xtreamM3uUrl = `${host}/get.php?username=${user}&password=${pass}&output=ts`;
+            
+            // Üretilen linki M3U yükleyiciye pasla
+            document.getElementById('m3uUrl').value = xtreamM3uUrl;
+            loadM3U();
+        }
+
+        // Kanalları Arayüze Çizdirme
+        function renderChannels(channelsToRender = allChannels) {
+            const listEl = document.getElementById('channelList');
+            const countEl = document.getElementById('channelCount');
+            listEl.innerHTML = '';
+            
+            countEl.innerText = `${channelsToRender.length} Kanal`;
+
+            if (channelsToRender.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-500 text-center mt-10">Kanal bulunamadı.</p>';
                 return;
             }
 
-            items.forEach((ch) => {
-                const li = document.createElement('li');
-                li.className = 'channel-item';
-                li.innerText = ch.name;
-                li.onclick = () => playChannel(ch.url, li);
-                listEl.appendChild(li);
-            });
-        }
+            document.getElementById('statusMessage').classList.add('hidden');
 
-        function playChannel(url, element) {
-            document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
-            if (element) element.classList.add('active');
-
-            const video = document.getElementById('videoPlayer');
-
-            if (Hls.isSupported()) {
-                if (hls) hls.destroy();
-                hls = new Hls({
-                    enableWorker: true,
-                    lowLatencyMode: true
-                });
-                hls.loadSource(url);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play().catch(e => console.log("Otomatik oynatma engellendi:", e));
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = url;
-                video.addEventListener('loadedmetadata', function() {
-                    video.play();
-                });
-            } else {
-                alert('Tarayıcınız bu video formatını desteklemiyor.');
-            }
-        }
-
-        function filterChannels() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = channels.filter(ch => ch.name.toLowerCase().includes(query));
-            renderChannels(filtered);
-        }
-
-        function showLoading(show) {
-            document.getElementById('loadingText').style.display = show ? 'block' : 'none';
-        }
-
-        function showAppScreen() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('appScreen').style.display = 'flex';
-            document.getElementById('resetBtn').classList.remove('hidden');
-        }
-
-        function logout() {
-            localStorage.removeItem('iptv_credentials');
-            if (hls) hls.destroy();
-            location.reload();
-        }
-    </script>
-</body>
-</html>
+            channelsToRender.forEach(channel => {
+                const btn = document.createElement('button');
