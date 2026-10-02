@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Auto Media IPTV Player</title>
     <style>
-        /* TAMAMEN STATİK VE KIRILMAZ PREMIUM ARABİRİM TASARIMI */
+        /* MODERN, SEKME DESTEKLİ VE KIRILMAZ IPTV PLAYER TASARIMI */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -43,31 +43,54 @@
             font-weight: 700;
         }
 
-        .grid-forms {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
+        /* Sekme Sistemi (Tab Menü) Tasarımı */
+        .tabs-nav {
+            display: flex;
+            background-color: #151f32;
+            border: 1px solid #243552;
+            border-radius: 8px;
+            overflow: hidden;
+            padding: 4px;
+            gap: 4px;
         }
 
-        @media (min-width: 768px) {
-            .grid-forms { grid-template-columns: 1fr 1fr; }
+        .tab-link {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            margin-top: 0;
         }
 
-        .config-card {
+        .tab-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .tab-link.active {
+            color: #fff;
+            background-color: #2563eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-content {
+            display: none;
             background-color: #151f32;
             border: 1px solid #243552;
             border-radius: 10px;
             padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
-        .config-card h2 {
-            font-size: 15px;
-            margin-bottom: 12px;
-            font-weight: 600;
+        .tab-content.active {
+            display: block;
         }
-
-        .m3u-color { color: #3b82f6; }
-        .xtream-color { color: #10b981; }
 
         .input-item {
             margin-bottom: 10px;
@@ -85,6 +108,7 @@
             color: #94a3b8;
             margin-bottom: 4px;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         input {
@@ -92,9 +116,15 @@
             background-color: #090d16;
             border: 1px solid #334155;
             color: #fff;
-            padding: 10px;
+            padding: 11px;
             border-radius: 6px;
             font-size: 13px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
         }
 
         button {
@@ -106,14 +136,14 @@
             font-size: 13px;
             cursor: pointer;
             color: white;
+            transition: background-color 0.2s;
             margin-top: 5px;
         }
 
-        .action-blue { background-color: #2563eb; }
-        .action-blue:hover { background-color: #1d4ed8; }
-        .action-green { background-color: #059669; }
-        .action-green:hover { background-color: #047857; }
+        .btn-submit { background-color: #2563eb; }
+        .btn-submit:hover { background-color: #1d4ed8; }
 
+        /* Durum Bildirim Paneli */
         .status-badge {
             padding: 12px;
             border-radius: 8px;
@@ -123,8 +153,10 @@
             background-color: rgba(30, 41, 59, 0.5);
             border: 1px solid #334155;
             color: #94a3b8;
+            font-weight: 500;
         }
 
+        /* Oynatıcı Alanı */
         .panel-layout {
             display: grid;
             grid-template-columns: 1fr;
@@ -140,6 +172,7 @@
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid #243552;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
         video {
@@ -155,6 +188,7 @@
             border-top: 1px solid #243552;
         }
 
+        /* Sağ Kanal Listesi */
         .sidebar {
             background-color: #151f32;
             border: 1px solid #243552;
@@ -163,6 +197,7 @@
             height: 450px;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
 
         .sidebar-top {
@@ -178,6 +213,7 @@
             border-radius: 12px;
             font-size: 11px;
             color: #cbd5e1;
+            font-weight: 600;
         }
 
         .channels-list {
@@ -202,6 +238,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            transition: all 0.2s;
         }
 
         .row-channel:hover {
@@ -214,6 +251,7 @@
             background-color: #2563eb;
             color: #fff;
             font-weight: bold;
+            border-color: #60a5fa;
         }
 
         .blank-text {
@@ -231,38 +269,44 @@
             <h1>🚗 Auto Media IPTV Player</h1>
         </header>
 
-        <div class="grid-forms">
-            <div class="config-card">
-                <h2 class="m3u-color">🔗 M3U Playlist Girişi</h2>
-                <div class="input-item">
-                    <label>M3U URL</label>
-                    <input type="text" id="m3uUrlBox" placeholder="https://site.com">
-                </div>
-                <button class="action-blue" id="btnM3u" onclick="startM3ULoad()">Kanalları Yükle</button>
-            </div>
-
-            <div class="config-card">
-                <h2 class="xtream-color">🔐 Xtream API Hızlı Giriş</h2>
-                <div class="input-item">
-                    <label>Sunucu Adresi (Host)</label>
-                    <input type="text" id="xtreamHostBox" placeholder="http://sunucuadresi.com:8080">
-                </div>
-                <div class="row-inputs">
-                    <div class="input-item">
-                        <label>Kullanıcı</label>
-                        <input type="text" id="xtreamUserBox" placeholder="Username">
-                    </div>
-                    <div class="input-item">
-                        <label>Şifre</label>
-                        <input type="password" id="xtreamPassBox" placeholder="Password">
-                    </div>
-                </div>
-                <button class="action-green" id="btnXtream" onclick="startXtreamLoad()">Yükle</button>
-            </div>
+        <!-- SEKME SEÇİM MENÜSÜ -->
+        <div class="tabs-nav">
+            <button class="tab-link active" onclick="switchTab(event, 'm3u-tab')">🔗 M3U Link Girişi</button>
+            <button class="tab-link" onclick="switchTab(event, 'xtream-tab')">🔐 Xtream API Girişi</button>
         </div>
 
+        <!-- M3U SEKME İÇERİĞİ -->
+        <div id="m3u-tab" class="tab-content active">
+            <div class="input-item">
+                <label>M3U / M3U8 Bağlantı Adresi</label>
+                <input type="text" id="m3uUrlBox" placeholder="https://site.com">
+            </div>
+            <button class="btn-submit" onclick="startM3ULoad()">Kanalları Yükle</button>
+        </div>
+
+        <!-- XTREAM API SEKME İÇERİĞİ -->
+        <div id="xtream-tab" class="tab-content">
+            <div class="input-item">
+                <label>Sunucu Adresi (Host URL)</label>
+                <input type="text" id="xtreamHostBox" placeholder="http://sunucuadresi.com:8080">
+            </div>
+            <div class="row-inputs">
+                <div class="input-item">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="xtreamUserBox" placeholder="Username">
+                </div>
+                <div class="input-item">
+                    <label>Şifre</label>
+                    <input type="password" id="xtreamPassBox" placeholder="Password">
+                </div>
+            </div>
+            <button class="btn-submit" onclick="startXtreamLoad()">Giriş Yap ve Yükle</button>
+        </div>
+
+        <!-- ORTAK DURUM BİLDİRİM ŞERİDİ -->
         <div id="statusAlert" class="status-badge">Sistem Hazır. Bilgilerinizi girip butona basın.</div>
 
+        <!-- VİDEO VE LİSTE PANELİ -->
         <div class="panel-layout">
             <div class="media-box">
                 <video id="carVideoView" controls autoplay></video>
@@ -288,44 +332,11 @@
         var loadedChannels = [];
         var mainVideo = document.getElementById('carVideoView');
 
-        function printStatus(msg, mode) {
-            var el = document.getElementById('statusAlert');
-            el.innerText = msg;
-            if (mode === 'err') {
-                el.style.borderColor = '#ef4444';
-                el.style.color = '#fca5a5';
-                el.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
-            } else if (mode === 'ok') {
-                el.style.borderColor = '#10b981';
-                el.style.color = '#a7f3d0';
-                el.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
-            } else {
-                el.style.borderColor = '#3b82f6';
-                el.style.color = '#93c5fd';
-                el.style.backgroundColor = 'rgba(59, 130, 246, 0.15)';
+        // Sekme Değiştirme Mekanizması
+        function switchTab(evt, tabId) {
+            var contents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < contents.length; i++) {
+                contents[i].classList.remove("active");
             }
-        }
-
-        function startM3ULoad() {
-            var rawUrl = document.getElementById('m3uUrlBox').value.trim();
-            if (!rawUrl) {
-                alert('Lütfen linkinizi yazın.');
-                return;
-            }
-
-            printStatus('Güvenli bağlantı tüneli kuruluyor, lütfen bekleyin...', 'wait');
-
-            // URL içindeki tüm tehlikeli karakterleri tarayıcı filtresinden gizler
-            var cleanUrl = encodeURIComponent(rawUrl);
-            var gateway = 'https://allorigins.win' + cleanUrl;
-
-            // Arka plandaki tüm kilitlenmeleri aşan izole istek mimarisi
-            fetch(gateway)
-                .then(function(res) { 
-                    if (!res.ok) throw new Error('Ağ hatası');
-                    return res.json(); 
-                })
-                .then(function(json) {
-                    if (json && json.contents && json.contents.trim().length > 0) {
-                        buildList(json.contents);
-                    } else {
+            var links = document.getElementsByClassName("tab-link");
+            for (var i = 0; i < links.length; i++) {
