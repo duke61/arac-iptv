@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Araç Web IPTV Player</title>
-    <!-- HLS.js Kütüphanesi (m3u8 yayınları oynatabilmek için) -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
@@ -61,7 +60,6 @@
             cursor: pointer;
         }
 
-        /* Giriş Formu Stilleri */
         .login-container {
             max-width: 500px;
             margin: 40px auto;
@@ -128,7 +126,6 @@
             margin-top: 10px;
         }
 
-        /* Oynatıcı & Kanal Listesi Düzeni */
         .app-container {
             display: none;
             flex-direction: column;
@@ -232,14 +229,12 @@
         <button class="btn-reset hidden" id="resetBtn" onclick="logout()">Çıkış Yap</button>
     </header>
 
-    <!-- Giriş Ekranı -->
     <div class="login-container" id="loginScreen">
         <div class="tab-buttons">
             <button class="tab-btn active" onclick="switchTab('m3u')">M3U Linki</button>
             <button class="tab-btn" onclick="switchTab('xtream')">Xtream API</button>
         </div>
 
-        <!-- M3U Formu -->
         <form id="m3uForm" onsubmit="handleM3uSubmit(event)">
             <div class="form-group">
                 <label for="m3uUrl">M3U / M3U8 Playlist URL Adresi</label>
@@ -248,7 +243,6 @@
             <button type="submit" class="btn-submit">Kanalları Yükle</button>
         </form>
 
-        <!-- Xtream Codes Formu -->
         <form id="xtreamForm" class="hidden" onsubmit="handleXtreamSubmit(event)">
             <div class="form-group">
                 <label for="xtreamHost">Sunucu URL (Host)</label>
@@ -268,7 +262,6 @@
         <div id="loadingText" class="loading-spinner">Oynatma listesi yükleniyor, lütfen bekleyin...</div>
     </div>
 
-    <!-- Oynatıcı Ekranı -->
     <div class="app-container" id="appScreen">
         <div class="player-section">
             <video id="videoPlayer" controls autoplay playsinline></video>
@@ -285,7 +278,6 @@
         let channels = [];
         let hls = null;
 
-        // Sayfa yüklendiğinde hafızadaki veriyi kontrol et
         window.onload = () => {
             const savedUrl = localStorage.getItem('iptv_m3u_url');
             if (savedUrl) {
@@ -330,31 +322,43 @@
                 host = host.slice(0, -1);
             }
 
-            // Xtream bilgilerinden M3U URL adresi oluşturma
             const m3uUrl = `${host}/get.php?username=${user}&password=${pass}&type=m3u_plus&output=ts`;
             localStorage.setItem('iptv_m3u_url', m3uUrl);
             loadPlaylist(m3uUrl);
         }
 
+        async function fetchWithProxy(targetUrl) {
+            // Doğrudan istek atmayı dene
+            try {
+                const res = await fetch(targetUrl);
+                if (res.ok) return await res.text();
+            } catch (e) {
+                console.log("Doğrudan bağlantı başarısız, CORS Proxy deneniyor...");
+            }
+
+            // Doğrudan bağlantı engellenirse AllOrigins CORS Proxy kullan
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+            const res = await fetch(proxyUrl);
+            if (!res.ok) throw new Error('CORS Proxy üzerinden de liste çekilemedi.');
+            return await res.text();
+        }
+
         async function loadPlaylist(url) {
             showLoading(true);
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Oynatma listesi indirilemedi.');
-                const text = await response.text();
+                const text = await fetchWithProxy(url);
                 parseM3U(text);
 
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').style.display = 'flex';
                 document.getElementById('resetBtn').classList.remove('hidden');
             } catch (err) {
-                alert('Yayın listesi yüklenirken hata oluştu! CORS engelini veya URL adresinizi kontrol edin.\nHata: ' + err.message);
+                alert('Yayın listesi yüklenirken hata oluştu!\nHata: ' + err.message);
             } finally {
                 showLoading(false);
             }
         }
 
-        // Basit ve hızlı M3U Parser
         function parseM3U(content) {
             channels = [];
             const lines = content.split('\n');
@@ -384,7 +388,7 @@
                 return;
             }
 
-            items.forEach((ch, index) => {
+            items.forEach((ch) => {
                 const li = document.createElement('li');
                 li.className = 'channel-item';
                 li.innerText = ch.name;
@@ -394,16 +398,13 @@
         }
 
         function playChannel(url, element) {
-            // Aktif kanal vurgulaması
             document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('active'));
             if(element) element.classList.add('active');
 
             const video = document.getElementById('videoPlayer');
 
             if (Hls.isSupported()) {
-                if (hls) {
-                    hls.destroy();
-                }
+                if (hls) hls.destroy();
                 hls = new Hls();
                 hls.loadSource(url);
                 hls.attachMedia(video);
@@ -411,13 +412,12 @@
                     video.play();
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Safari ve iOS cihazlar için yerel HLS desteği
                 video.src = url;
                 video.addEventListener('loadedmetadata', function() {
                     video.play();
                 });
             } else {
-                alert('Tarayıcınız bu video formatını oynatmayı desteklemiyor.');
+                alert('Tarayıcınız bu video formatını desteklemiyor.');
             }
         }
 
@@ -428,12 +428,7 @@
         }
 
         function showLoading(show) {
-            const spinner = document.getElementById('loadingText');
-            if (show) {
-                spinner.style.display = 'block';
-            } else {
-                spinner.style.display = 'none';
-            }
+            document.getElementById('loadingText').style.display = show ? 'block' : 'none';
         }
 
         function logout() {
