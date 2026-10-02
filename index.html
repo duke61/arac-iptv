@@ -2,105 +2,101 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Web IPTV Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Auto Media IPTV Player</title>
     <style>
+        /* ARACIN EKRANINA UYGUN, DOKUNMATİK DOSTU TASARIM */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            padding: 20px;
+            background-color: #090d16;
+            color: #f1f5f9;
+            padding: 10px;
             min-height: 100vh;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
         }
 
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1280px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 12px;
         }
 
         header {
             text-align: center;
-            padding: 15px 0;
+            padding: 5px 0;
             border-bottom: 1px solid #1e293b;
         }
 
         header h1 {
-            font-size: 26px;
+            font-size: 20px;
             color: #3b82f6;
-            margin-bottom: 6px;
             font-weight: 700;
         }
 
-        header p {
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        .forms-grid {
+        /* Giriş Kartları */
+        .grid-forms {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 12px;
         }
 
         @media (min-width: 768px) {
-            .forms-grid { grid-template-columns: 1fr 1fr; }
+            .grid-forms { grid-template-columns: 1fr 1fr; }
         }
 
-        .card {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        .config-card {
+            background-color: #151f32;
+            border: 1px solid #243552;
+            border-radius: 8px;
+            padding: 15px;
         }
 
-        .card h2 {
-            font-size: 16px;
-            margin-bottom: 15px;
+        .config-card h2 {
+            font-size: 14px;
+            margin-bottom: 10px;
             font-weight: 600;
         }
 
-        .m3u-title { color: #60a5fa; }
-        .xtream-title { color: #34d399; }
+        .m3u-color { color: #3b82f6; }
+        .xtream-color { color: #10b981; }
 
-        .form-group {
-            margin-bottom: 12px;
+        .input-item {
+            margin-bottom: 8px;
         }
 
-        .form-row {
+        .row-inputs {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
         }
 
         label {
             display: block;
-            font-size: 11px;
+            font-size: 10px;
             color: #94a3b8;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
         input {
             width: 100%;
-            background-color: #0f172a;
-            border: 1px solid #475569;
+            background-color: #090d16;
+            border: 1px solid #334155;
             color: #fff;
-            padding: 11px;
-            border-radius: 6px;
-            font-size: 13px;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 12px;
         }
 
         input:focus {
@@ -110,26 +106,23 @@
 
         button {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             color: white;
-            transition: background-color 0.2s;
-            margin-top: 5px;
         }
 
-        .btn-blue { background-color: #2563eb; }
-        .btn-blue:hover { background-color: #1d4ed8; }
-        .btn-green { background-color: #059669; }
-        .btn-green:hover { background-color: #047857; }
+        .action-blue { background-color: #2563eb; }
+        .action-green { background-color: #059669; }
 
-        .status-box {
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
+        /* Canlı Durum Bildirimi */
+        .status-badge {
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 12px;
             text-align: center;
             display: none;
             background-color: rgba(59, 130, 246, 0.1);
@@ -137,24 +130,24 @@
             color: #93c5fd;
         }
 
-        .main-layout {
+        /* Oynatıcı ve Liste Alanı */
+        .panel-layout {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 12px;
         }
 
         @media (min-width: 1024px) {
-            .main-layout { grid-template-columns: 2fr 1fr; }
+            .panel-layout { grid-template-columns: 1.8fr 1.2fr; }
         }
 
-        .player-container {
+        .media-box {
             background-color: #000;
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
-            border: 1px solid #334155;
+            border: 1px solid #243552;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
         video {
@@ -163,56 +156,56 @@
             background-color: #000;
         }
 
-        .player-footer {
-            background-color: #1e293b;
-            padding: 15px;
-            font-size: 14px;
-            border-top: 1px solid #334155;
+        .media-title {
+            background-color: #151f32;
+            padding: 12px;
+            font-size: 13px;
+            border-top: 1px solid #243552;
             font-weight: 500;
         }
 
-        .sidebar {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 15px;
-            height: 520px;
+        /* Araç İçi Kolay Kaydırılabilir Kanal Listesi */
+        .channels-sidebar {
+            background-color: #151f32;
+            border: 1px solid #243552;
+            border-radius: 8px;
+            padding: 12px;
+            height: 420px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
 
-        .sidebar-header {
+        .sidebar-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
-        .count-badge {
-            background-color: #334155;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
+        .badge-info {
+            background-color: #243552;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
             color: #cbd5e1;
-            font-weight: 600;
         }
 
-        .list-scroller {
+        .channels-list {
             flex: 1;
             overflow-y: auto;
-            margin-top: 10px;
+            margin-top: 8px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
+            padding-right: 2px;
         }
 
-        .channel-btn {
+        .row-channel {
             width: 100%;
             text-align: left;
-            background-color: rgba(255, 255, 255, 0.03);
+            background-color: rgba(255, 255, 255, 0.02);
             border: 1px solid transparent;
-            padding: 11px;
+            padding: 12px; /* Dokunması kolay olması için genişletildi */
             border-radius: 6px;
             color: #cbd5e1;
             font-size: 13px;
@@ -222,24 +215,23 @@
             text-overflow: ellipsis;
         }
 
-        .channel-btn:hover {
-            background-color: rgba(59, 130, 246, 0.1);
+        .row-channel:active, .row-channel:hover {
+            background-color: rgba(59, 130, 246, 0.15);
             border-color: #3b82f6;
             color: #fff;
         }
 
-        .channel-btn.active {
+        .row-channel.selected {
             background-color: #2563eb;
             color: #fff;
             font-weight: bold;
-            border-color: #60a5fa;
         }
 
-        .no-data {
+        .blank-text {
             text-align: center;
             color: #64748b;
-            font-size: 13px;
-            margin-top: 40px;
+            font-size: 12px;
+            margin-top: 50px;
         }
     </style>
 </head>
@@ -247,91 +239,95 @@
 
     <div class="container">
         <header>
-            <h1>📺 Premium Web IPTV Player</h1>
-            <p>M3U linkinizi veya Xtream hesap bilgilerinizi girerek anında izleyin.</p>
+            <h1>🚗 Auto Media IPTV Player</h1>
         </header>
 
-        <div class="forms-grid">
-            <div class="card">
-                <h2 class="m3u-title">🔗 M3U / M3U8 Playlist</h2>
-                <div class="form-group">
-                    <label>Oynatma Listesi URL Adresi</label>
-                    <input type="text" id="inputM3u" placeholder="https://site.com">
+        <!-- Giriş Panelleri -->
+        <div class="grid-forms">
+            <div class="config-card">
+                <h2 class="m3u-color">🔗 M3U Playlist Girişi</h2>
+                <div class="input-item">
+                    <label>M3U URL</label>
+                    <input type="text" id="m3uUrlBox" placeholder="https://site.com">
                 </div>
-                <button class="btn-blue" onclick="handleM3U()">Kanalları Yükle</button>
+                <button class="action-blue" onclick="startM3ULoad()">Kanalları Yükle</button>
             </div>
 
-            <div class="card">
-                <h2 class="xtream-title">🔐 Xtream API Girişi</h2>
-                <div class="form-group">
-                    <label>Sunucu URL (Host)</label>
-                    <input type="text" id="inputHost" placeholder="http://sunucuadresi.com:8080">
+            <div class="config-card">
+                <h2 class="xtream-color">🔐 Xtream API Hızlı Giriş</h2>
+                <div class="input-item">
+                    <label>Sunucu Adresi (Host)</label>
+                    <input type="text" id="xtreamHostBox" placeholder="http://sunucuadresi.com:8080">
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Kullanıcı Adı</label>
-                        <input type="text" id="inputUser" placeholder="Username">
+                <div class="row-inputs">
+                    <div class="input-item">
+                        <label>Kullanıcı</label>
+                        <input type="text" id="xtreamUserBox" placeholder="Username">
                     </div>
-                    <div class="form-group">
+                    <div class="input-item">
                         <label>Şifre</label>
-                        <input type="password" id="inputPass" placeholder="Password">
+                        <input type="password" id="xtreamPassBox" placeholder="Password">
                     </div>
                 </div>
-                <button class="btn-green" onclick="handleXtream()">Giriş Yap ve Yükle</button>
+                <button class="action-green" onclick="startXtreamLoad()">Yükle</button>
             </div>
         </div>
 
-        <div id="statusNotification" class="status-box"></div>
+        <div id="statusAlert" class="status-badge"></div>
 
-        <div class="main-layout">
-            <div class="player-container">
-                <video id="webPlayer" controls autoplay></video>
-                <div class="player-footer" id="nowPlaying">
-                    Oynatılan Kanal: <span style="color: #60a5fa;">Henüz Seçilmedi</span>
+        <!-- Oynatıcı Alanları -->
+        <div class="panel-layout">
+            <div class="media-box">
+                <video id="carVideoView" controls autoplay playsinline></video>
+                <div class="media-title" id="lblPlaying">
+                    Kanal: <span style="color: #60a5fa;">Seçilmedi</span>
                 </div>
             </div>
 
             <div class="sidebar">
-                <div class="sidebar-header">
-                    <h3>Kanal Listesi</h3>
-                    <span class="count-badge" id="totalChannels">0 Kanal</span>
+                <div class="sidebar-top">
+                    <h3>Kanallar</h3>
+                    <span class="badge-info" id="lblTotal">0 Kanal</span>
                 </div>
-                <input type="text" id="searchBar" oninput="searchChannels()" placeholder="Kanal adı ile ara...">
-                <div class="list-scroller" id="boxChannels">
-                    <div class="no-data">Lütfen listenizi yukarıdan yükleyin.</div>
+                <input type="text" id="txtSearch" oninput="runSearch()" placeholder="Kanal ismi ara...">
+                <div class="channels-list" id="domChannelList">
+                    <div class="blank-text">Listenizi yüklediğinizde kanallar burada listelenir.</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let globalChannels = [];
-        const videoElement = document.getElementById('webPlayer');
+        let loadedChannels = [];
+        const mainVideo = document.getElementById('carVideoView');
 
-        function updateStatus(text, statusType) {
-            const box = document.getElementById('statusNotification');
-            box.innerText = text;
-            box.style.display = 'block';
-            if (statusType === 'error') {
-                box.style.borderColor = '#ef4444';
-                box.style.color = '#fca5a5';
-                box.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-            } else if (statusType === 'success') {
-                box.style.borderColor = '#10b981';
-                box.style.color = '#a7f3d0';
-                box.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+        function printStatus(msg, mode) {
+            const el = document.getElementById('statusAlert');
+            el.innerText = msg;
+            el.style.display = 'block';
+            if (mode === 'err') {
+                el.style.borderColor = '#ef4444';
+                el.style.color = '#fca5a5';
+                el.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            } else if (mode === 'ok') {
+                el.style.borderColor = '#10b981';
+                el.style.color = '#a7f3d0';
+                el.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
             } else {
-                box.style.borderColor = '#3b82f6';
-                box.style.color = '#93c5fd';
-                box.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                el.style.borderColor = '#3b82f6';
+                el.style.color = '#93c5fd';
+                el.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
             }
         }
 
-        async function handleM3U() {
-            const targetUrl = document.getElementById('inputM3u').value.trim();
-            if (!targetUrl) {
-                alert('Lütfen geçerli bir URL adresi girin.');
-                return;
-            }
+        async function startM3ULoad() {
+            const rawUrl = document.getElementById('m3uUrlBox').value.trim();
+            if (!rawUrl) return alert('Lütfen linkinizi yazın.');
 
-            // 1. ADIM: Birinci Güçlü Proxy'yi Dene
+            printStatus('Bağlantı tüneli kuruluyor (Yöntem 1)...', 'wait');
+
+            // Çözüm Havuzu 1: Tarayıcı engelini aşan güvenli tünel
+            try {
+                const gateway1 = 'https://corsproxy.io?' + encodeURIComponent(rawUrl);
+                const resp = await fetch(gateway1);
+                const txt = await resp.text();
