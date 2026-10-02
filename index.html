@@ -260,7 +260,7 @@
             <button type="submit" class="btn-submit">Giriş Yap ve Yükle</button>
         </form>
 
-        <div id="loadingText" class="loading-spinner">Yayın listesi çekiliyor...</div>
+        <div id="loadingText" class="loading-spinner">Kanal listesi çekiliyor, lütfen bekleyin...</div>
     </div>
 
     <div class="app-container" id="appScreen">
@@ -280,9 +280,14 @@
         let hls = null;
 
         window.onload = () => {
-            const savedUrl = localStorage.getItem('iptv_m3u_url');
-            if (savedUrl) {
-                loadPlaylist(savedUrl);
+            const savedData = localStorage.getItem('iptv_credentials');
+            if (savedData) {
+                const creds = JSON.parse(savedData);
+                if (creds.type === 'xtream') {
+                    fetchXtreamChannels(creds.host, creds.user, creds.pass);
+                } else {
+                    fetchM3uChannels(creds.url);
+                }
             }
         };
 
@@ -305,8 +310,8 @@
             e.preventDefault();
             const url = document.getElementById('m3uUrl').value.trim();
             if (url) {
-                localStorage.setItem('iptv_m3u_url', url);
-                loadPlaylist(url);
+                localStorage.setItem('iptv_credentials', JSON.stringify({ type: 'm3u', url: url }));
+                fetchM3uChannels(url);
             }
         }
 
@@ -323,48 +328,57 @@
                 host = host.slice(0, -1);
             }
 
-            const m3uUrl = `${host}/get.php?username=${user}&password=${pass}&type=m3u_plus&output=ts`;
-            localStorage.setItem('iptv_m3u_url', m3uUrl);
-            loadPlaylist(m3uUrl);
+            localStorage.setItem('iptv_credentials', JSON.stringify({ type: 'xtream', host, user, pass }));
+            fetchXtreamChannels(host, user, pass);
         }
 
-        async function fetchPlaylistData(targetUrl) {
-            const proxies = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
-            ];
-
-            for (const proxy of proxies) {
-                try {
-                    const res = await fetch(proxy);
-                    if (res.ok) {
-                        const text = await res.text();
-                        if (text && text.includes('#EXTM3U')) return text;
-                    }
-                } catch (e) {
-                    console.warn("Proxy hatası:", e);
-                }
-            }
-            throw new Error("M3U verisi çekilemedi.");
-        }
-
-        async function loadPlaylist(url) {
+        async function fetchXtreamChannels(host, user, pass) {
             showLoading(true);
+            const apiUrl = `${host}/player_api.php?username=${user}&password=${pass}&action=get_live_streams`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+
             try {
-                const text = await fetchPlaylistData(url);
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error("Sunucu bağlantı hatası.");
+                
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    channels = data.map(item => ({
+                        name: item.name,
+                        url: `${host}/live/${user}/${pass}/${item.stream_id}.m3u8`
+                    }));
+                    renderChannels(channels);
+                    showAppScreen();
+                } else {
+                    throw new Error("Kullanıcı adı/şifre hatalı veya kanal listesi boş.");
+                }
+            } catch (err) {
+                alert("Xtream Yükleme Hatası: " + err.message);
+                logout();
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function fetchM3uChannels(targetUrl) {
+            showLoading(true);
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
+            try {
+                const res = await fetch(proxyUrl);
+                if (!res.ok) throw new Error("M3U dosyası indirilemedi.");
+                const text = await res.text();
+
                 parseM3U(text);
 
                 if (channels.length === 0) {
-                    alert("Kanal bulunamadı veya liste biçimi okunamadı.");
-                    logout();
-                    return;
+                    throw new Error("M3U dosyasında kanal ayrıştırılamadı.");
                 }
 
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('appScreen').style.display = 'flex';
-                document.getElementById('resetBtn').classList.remove('hidden');
+                showAppScreen();
             } catch (err) {
-                alert("Yükleme hatası: " + err.message);
+                alert("M3U Yükleme Hatası: " + err.message);
                 logout();
             } finally {
                 showLoading(false);
@@ -382,11 +396,15 @@
                 let line = lines[i].trim();
                 
                 if (line.startsWith('#EXTINF:')) {
-                    const parts = line.split(',');
-                    currentName = parts[parts.length - 1].trim();
+                    const commaIndex = line.lastIndexOf(',');
+                    if (commaIndex !== -1) {
+                        currentName = line.substring(commaIndex + 1).trim();
+                    } else {
+                        currentName = 'Kanal ' + (channels.length + 1);
+                    }
                 } else if (line.length > 0 && !line.startsWith('#')) {
                     channels.push({
-                        name: currentName || 'Kanal ' + (channels.length + 1),
+                        name: currentName || ('Kanal ' + (channels.length + 1)),
                         url: line
                     });
                     currentName = '';
@@ -421,11 +439,14 @@
 
             if (Hls.isSupported()) {
                 if (hls) hls.destroy();
-                hls = new Hls();
+                hls = new Hls({
+                    enableWorker: true,
+                    lowLatencyMode: true
+                });
                 hls.loadSource(url);
                 hls.attachMedia(video);
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play();
+                    video.play().catch(e => console.log("Oynatma engellendi:", e));
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = url;
@@ -447,8 +468,14 @@
             document.getElementById('loadingText').style.display = show ? 'block' : 'none';
         }
 
+        function showAppScreen() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appScreen').style.display = 'flex';
+            document.getElementById('resetBtn').classList.remove('hidden');
+        }
+
         function logout() {
-            localStorage.removeItem('iptv_m3u_url');
+            localStorage.removeItem('iptv_credentials');
             if (hls) hls.destroy();
             location.reload();
         }
