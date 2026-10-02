@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Web IPTV Player</title>
     <style>
-        /* DIŞ BAĞIMLILIĞI OLMAYAN SAF CSS TASARIMI */
+        /* SIFIR BAĞIMLILIKLI PREMIUM CSS TASARIMI */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -32,14 +32,15 @@
 
         header {
             text-align: center;
-            padding: 10px 0;
+            padding: 15px 0;
             border-bottom: 1px solid #1e293b;
         }
 
         header h1 {
-            font-size: 24px;
+            font-size: 26px;
             color: #3b82f6;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            font-weight: 700;
         }
 
         header p {
@@ -47,7 +48,7 @@
             font-size: 14px;
         }
 
-        /* Giriş Formları */
+        /* Giriş Panelleri */
         .forms-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -63,7 +64,7 @@
             border: 1px solid #334155;
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
         .card h2 {
@@ -89,8 +90,9 @@
             display: block;
             font-size: 11px;
             color: #94a3b8;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         input {
@@ -98,9 +100,10 @@
             background-color: #0f172a;
             border: 1px solid #475569;
             color: #fff;
-            padding: 10px;
+            padding: 11px;
             border-radius: 6px;
             font-size: 13px;
+            transition: border-color 0.2s;
         }
 
         input:focus {
@@ -117,15 +120,16 @@
             font-size: 13px;
             cursor: pointer;
             color: white;
-            transition: opacity 0.2s;
+            transition: background-color 0.2s;
             margin-top: 5px;
         }
 
-        button:hover { opacity: 0.9; }
         .btn-blue { background-color: #2563eb; }
+        .btn-blue:hover { background-color: #1d4ed8; }
         .btn-green { background-color: #059669; }
+        .btn-green:hover { background-color: #047857; }
 
-        /* Durum Bildirimi */
+        /* Durum Bildirim Çubuğu */
         .status-box {
             padding: 12px;
             border-radius: 8px;
@@ -137,7 +141,7 @@
             color: #93c5fd;
         }
 
-        /* Oynatıcı Paneli */
+        /* Oynatıcı Düzeni */
         .main-layout {
             display: grid;
             grid-template-columns: 1fr;
@@ -155,6 +159,7 @@
             border: 1px solid #334155;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
         video {
@@ -168,17 +173,19 @@
             padding: 15px;
             font-size: 14px;
             border-top: 1px solid #334155;
+            font-weight: 500;
         }
 
-        /* Sağ Kanal Listesi */
+        /* Sağ Liste Paneli */
         .sidebar {
             background-color: #1e293b;
             border: 1px solid #334155;
             border-radius: 12px;
             padding: 15px;
-            height: 500px;
+            height: 520px;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
 
         .sidebar-header {
@@ -190,10 +197,11 @@
 
         .count-badge {
             background-color: #334155;
-            padding: 2px 8px;
+            padding: 3px 8px;
             border-radius: 12px;
             font-size: 11px;
             color: #cbd5e1;
+            font-weight: 600;
         }
 
         .list-scroller {
@@ -202,7 +210,7 @@
             margin-top: 10px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 6px;
         }
 
         .channel-btn {
@@ -210,7 +218,7 @@
             text-align: left;
             background-color: rgba(255, 255, 255, 0.03);
             border: 1px solid transparent;
-            padding: 10px;
+            padding: 11px;
             border-radius: 6px;
             color: #cbd5e1;
             font-size: 13px;
@@ -218,6 +226,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            transition: all 0.2s;
         }
 
         .channel-btn:hover {
@@ -230,13 +239,14 @@
             background-color: #2563eb;
             color: #fff;
             font-weight: bold;
+            border-color: #60a5fa;
         }
 
         .no-data {
             text-align: center;
             color: #64748b;
             font-size: 13px;
-            margin-top: 5px;
+            margin-top: 40px;
         }
     </style>
 </head>
@@ -245,22 +255,22 @@
     <div class="container">
         <header>
             <h1>📺 Premium Web IPTV Player</h1>
-            <p>Bilgilerinizi girin, listeniz sağ tarafta anında listelensin.</p>
+            <p>M3U linkinizi veya Xtream hesap bilgilerinizi girerek anında izleyin.</p>
         </header>
 
-        <!-- Form Alanları -->
+        <!-- Giriş Bölümleri -->
         <div class="forms-grid">
-            <!-- M3U List -->
+            <!-- M3U Form -->
             <div class="card">
                 <h2 class="m3u-title">🔗 M3U / M3U8 Playlist</h2>
                 <div class="form-group">
-                    <label>Oynatma Listesi URL</label>
+                    <label>Oynatma Listesi URL Adresi</label>
                     <input type="text" id="inputM3u" placeholder="https://site.com">
                 </div>
                 <button class="btn-blue" onclick="handleM3U()">Kanalları Yükle</button>
             </div>
 
-            <!-- Xtream API -->
+            <!-- Xtream Form -->
             <div class="card">
                 <h2 class="xtream-title">🔐 Xtream API Girişi</h2>
                 <div class="form-group">
@@ -281,28 +291,28 @@
             </div>
         </div>
 
-        <!-- Durum Çubuğu -->
+        <!-- Durum Bildirimi -->
         <div id="statusNotification" class="status-box"></div>
 
-        <!-- Oynatma ve Liste Düzeni -->
+        <!-- Ana Düzen -->
         <div class="main-layout">
             <!-- Sol Video Oynatıcı -->
             <div class="player-container">
-                <video id="webPlayer" controls></video>
+                <video id="webPlayer" controls autoplay></video>
                 <div class="player-footer" id="nowPlaying">
                     Oynatılan Kanal: <span style="color: #60a5fa;">Henüz Seçilmedi</span>
                 </div>
             </div>
 
-            <!-- Sağ Liste -->
+            <!-- Sağ Kanal Listesi -->
             <div class="sidebar">
                 <div class="sidebar-header">
                     <h3>Kanal Listesi</h3>
                     <span class="count-badge" id="totalChannels">0 Kanal</span>
                 </div>
-                <input type="text" id="searchBar" oninput="searchChannels()" placeholder="Kanal ara..." style="margin-top:5px;">
+                <input type="text" id="searchBar" oninput="searchChannels()" placeholder="Kanal adı ile ara...">
                 <div class="list-scroller" id="boxChannels">
-                    <div class="no-data">Lütfen listenizi yükleyin.</div>
+                    <div class="no-data">Lütfen listenizi yukarıdan yükleyin.</div>
                 </div>
             </div>
         </div>
@@ -312,29 +322,20 @@
         let globalChannels = [];
         const videoElement = document.getElementById('webPlayer');
 
-        function updateStatus(text, isError = false) {
+        function updateStatus(text, isError) {
             const box = document.getElementById('statusNotification');
             box.innerText = text;
             box.style.display = 'block';
-            box.style.borderColor = isError ? '#ef4444' : '#3b82f6';
-            box.style.color = isError ? '#fca5a5' : '#93c5fd';
+            if (isError) {
+                box.style.borderColor = '#ef4444';
+                box.style.color = '#fca5a5';
+                box.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            } else {
+                box.style.borderColor = '#3b82f6';
+                box.style.color = '#93c5fd';
+                box.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+            }
         }
 
-        // M3U Yükleme İşlemi
+        // M3U Verisini İndirme Fonksiyonu
         async function handleM3U() {
-            const targetUrl = document.getElementById('inputM3u').value.trim();
-            if (!targetUrl) return alert('Lütfen geçerli bir URL girin.');
-
-            updateStatus('Liste indiriliyor, lütfen bekleyin...');
-
-            try {
-                // Tarayıcı kısıtlamalarını (CORS) aşmak için doğrudan allorigins proxy yapısı kullanılıyor
-                const proxyUrl = `https://allorigins.win{encodeURIComponent(targetUrl)}`;
-                const response = await fetch(proxyUrl);
-                const data = await response.json();
-                
-                if (data.contents) {
-                    processM3UData(data.contents);
-                } else {
-                    throw new Error('İçerik boş.');
-                }
