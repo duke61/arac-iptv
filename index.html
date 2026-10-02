@@ -260,7 +260,7 @@
             <button type="submit" class="btn-submit">Giriş Yap ve Yükle</button>
         </form>
 
-        <div id="loadingText" class="loading-spinner">Listeler çekiliyor, lütfen bekleyin...</div>
+        <div id="loadingText" class="loading-spinner">Yayın listesi indiriliyor...</div>
     </div>
 
     <div class="app-container" id="appScreen">
@@ -328,26 +328,11 @@
             loadPlaylist(m3uUrl);
         }
 
-        function fetchPlaylist(targetUrl) {
-            return new Promise((resolve, reject) => {
-                // Her ihtimale karşı Yandex ve Cloudflare CORS proxy servisi üzerinden çek
-                const proxyUrl = `https://cors-anywhere.herokuapp.com/${targetUrl}`;
-                const fallbackProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-
-                fetch(fallbackProxy)
-                    .then(res => {
-                        if (!res.ok) throw new Error("Yayın listesi çekilemedi.");
-                        return res.text();
-                    })
-                    .then(data => resolve(data))
-                    .catch(() => {
-                        // İkinci proxy denemesi
-                        fetch(proxyUrl)
-                            .then(res => res.text())
-                            .then(data => resolve(data))
-                            .catch(err => reject(err));
-                    });
-            });
+        async function fetchPlaylist(targetUrl) {
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+            const res = await fetch(proxyUrl);
+            if (!res.ok) throw new Error("Veri indirilemedi.");
+            return await res.text();
         }
 
         async function loadPlaylist(url) {
@@ -356,11 +341,18 @@
                 const text = await fetchPlaylist(url);
                 parseM3U(text);
 
+                if (channels.length === 0) {
+                    alert("Yayın listesi çekildi fakat içinde kanal bulunamadı. Lütfen giriş bilgilerinizi kontrol edin.");
+                    logout();
+                    return;
+                }
+
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').style.display = 'flex';
                 document.getElementById('resetBtn').classList.remove('hidden');
             } catch (err) {
-                alert("Yayın listesi yüklenemedi!\n\nLütfen girdiğiniz bilgileri (Kullanıcı Adı/Şifre/Host) kontrol edin veya tarayıcıda güvensiz içeriklere izin verildiğinden emin olun.");
+                alert("Liste yüklenirken hata oluştu: " + err.message);
+                logout();
             } finally {
                 showLoading(false);
             }
@@ -368,19 +360,29 @@
 
         function parseM3U(content) {
             channels = [];
-            const lines = content.split('\n');
+            if (!content) return;
+
+            // Satır sonu karakterlerini standartlaştır
+            const lines = content.replace(/\r/g, '').split('\n');
             let currentName = '';
 
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
+                
                 if (line.startsWith('#EXTINF:')) {
-                    const nameParts = line.split(',');
-                    currentName = nameParts[nameParts.length - 1].trim();
-                } else if (line.length > 0 && !line.startsWith('#')) {
-                    if (currentName) {
-                        channels.push({ name: currentName, url: line });
-                        currentName = '';
+                    // Virgül sonrasındaki kanal adını al
+                    const commaIdx = line.lastIndexOf(',');
+                    if (commaIdx !== -1) {
+                        currentName = line.substring(commaIdx + 1).trim();
+                    } else {
+                        currentName = 'Kanal ' + (channels.length + 1);
                     }
+                } else if (line.length > 0 && !line.startsWith('#')) {
+                    channels.push({
+                        name: currentName || ('Kanal ' + (channels.length + 1)),
+                        url: line
+                    });
+                    currentName = '';
                 }
             }
             renderChannels(channels);
