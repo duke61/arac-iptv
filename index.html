@@ -327,26 +327,30 @@
             loadPlaylist(m3uUrl);
         }
 
-        async function fetchWithProxy(targetUrl) {
-            // Doğrudan istek atmayı dene
-            try {
-                const res = await fetch(targetUrl);
-                if (res.ok) return await res.text();
-            } catch (e) {
-                console.log("Doğrudan bağlantı başarısız, CORS Proxy deneniyor...");
-            }
-
-            // Doğrudan bağlantı engellenirse AllOrigins CORS Proxy kullan
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-            const res = await fetch(proxyUrl);
-            if (!res.ok) throw new Error('CORS Proxy üzerinden de liste çekilemedi.');
-            return await res.text();
+        function fetchPlaylistWithCorsProxy(targetUrl) {
+            return new Promise((resolve, reject) => {
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+                
+                fetch(proxyUrl)
+                    .then(response => {
+                        if (response.ok) return response.json();
+                        throw new Error('Proxy sunucu yanıt vermedi.');
+                    })
+                    .then(data => {
+                        if (data.contents) {
+                            resolve(data.contents);
+                        } else {
+                            reject(new Error('Playlist verisi alınamadı.'));
+                        }
+                    })
+                    .catch(err => reject(err));
+            });
         }
 
         async function loadPlaylist(url) {
             showLoading(true);
             try {
-                const text = await fetchWithProxy(url);
+                const text = await fetchPlaylistWithCorsProxy(url);
                 parseM3U(text);
 
                 document.getElementById('loginScreen').classList.add('hidden');
