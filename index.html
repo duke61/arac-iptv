@@ -5,31 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Auto Media IPTV Player</title>
     <style>
-        /* ARACIN EKRANINA UYGUN, DOKUNMATİK DOSTU TASARIM */
+        /* TAMAMEN STATİK VE KIRILMAZ PREMIUM ARABİRİM TASARIMI */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: #090d16;
             color: #f1f5f9;
-            padding: 10px;
+            padding: 15px;
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
         }
 
         .container {
             width: 100%;
-            max-width: 1280px;
+            max-width: 1200px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
 
         header {
@@ -39,16 +38,15 @@
         }
 
         header h1 {
-            font-size: 20px;
+            font-size: 22px;
             color: #3b82f6;
             font-weight: 700;
         }
 
-        /* Giriş Kartları */
         .grid-forms {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
+            gap: 15px;
         }
 
         @media (min-width: 768px) {
@@ -58,13 +56,13 @@
         .config-card {
             background-color: #151f32;
             border: 1px solid #243552;
-            border-radius: 8px;
-            padding: 15px;
+            border-radius: 10px;
+            padding: 20px;
         }
 
         .config-card h2 {
-            font-size: 14px;
-            margin-bottom: 10px;
+            font-size: 15px;
+            margin-bottom: 12px;
             font-weight: 600;
         }
 
@@ -72,20 +70,20 @@
         .xtream-color { color: #10b981; }
 
         .input-item {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .row-inputs {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 10px;
         }
 
         label {
             display: block;
-            font-size: 10px;
+            font-size: 11px;
             color: #94a3b8;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
             text-transform: uppercase;
         }
 
@@ -94,47 +92,43 @@
             background-color: #090d16;
             border: 1px solid #334155;
             color: #fff;
-            padding: 8px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #3b82f6;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
         }
 
         button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 13px;
             cursor: pointer;
             color: white;
+            margin-top: 5px;
         }
 
         .action-blue { background-color: #2563eb; }
+        .action-blue:hover { background-color: #1d4ed8; }
         .action-green { background-color: #059669; }
+        .action-green:hover { background-color: #047857; }
 
-        /* Canlı Durum Bildirimi */
         .status-badge {
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
             text-align: center;
-            display: none;
-            background-color: rgba(59, 130, 246, 0.1);
-            border: 1px solid #3b82f6;
-            color: #93c5fd;
+            display: block;
+            background-color: rgba(30, 41, 59, 0.5);
+            border: 1px solid #334155;
+            color: #94a3b8;
         }
 
-        /* Oynatıcı ve Liste Alanı */
         .panel-layout {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
+            gap: 15px;
         }
 
         @media (min-width: 1024px) {
@@ -143,11 +137,9 @@
 
         .media-box {
             background-color: #000;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             border: 1px solid #243552;
-            display: flex;
-            flex-direction: column;
         }
 
         video {
@@ -159,18 +151,16 @@
         .media-title {
             background-color: #151f32;
             padding: 12px;
-            font-size: 13px;
+            font-size: 14px;
             border-top: 1px solid #243552;
-            font-weight: 500;
         }
 
-        /* Araç İçi Kolay Kaydırılabilir Kanal Listesi */
-        .channels-sidebar {
+        .sidebar {
             background-color: #151f32;
             border: 1px solid #243552;
-            border-radius: 8px;
-            padding: 12px;
-            height: 420px;
+            border-radius: 10px;
+            padding: 15px;
+            height: 450px;
             display: flex;
             flex-direction: column;
         }
@@ -179,25 +169,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .badge-info {
             background-color: #243552;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
             color: #cbd5e1;
         }
 
         .channels-list {
             flex: 1;
             overflow-y: auto;
-            margin-top: 8px;
+            margin-top: 10px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            padding-right: 2px;
+            gap: 5px;
         }
 
         .row-channel {
@@ -205,7 +194,7 @@
             text-align: left;
             background-color: rgba(255, 255, 255, 0.02);
             border: 1px solid transparent;
-            padding: 12px; /* Dokunması kolay olması için genişletildi */
+            padding: 12px;
             border-radius: 6px;
             color: #cbd5e1;
             font-size: 13px;
@@ -215,8 +204,8 @@
             text-overflow: ellipsis;
         }
 
-        .row-channel:active, .row-channel:hover {
-            background-color: rgba(59, 130, 246, 0.15);
+        .row-channel:hover {
+            background-color: rgba(59, 130, 246, 0.1);
             border-color: #3b82f6;
             color: #fff;
         }
@@ -230,8 +219,8 @@
         .blank-text {
             text-align: center;
             color: #64748b;
-            font-size: 12px;
-            margin-top: 50px;
+            font-size: 13px;
+            margin-top: 40px;
         }
     </style>
 </head>
@@ -242,7 +231,6 @@
             <h1>🚗 Auto Media IPTV Player</h1>
         </header>
 
-        <!-- Giriş Panelleri -->
         <div class="grid-forms">
             <div class="config-card">
                 <h2 class="m3u-color">🔗 M3U Playlist Girişi</h2>
@@ -250,7 +238,7 @@
                     <label>M3U URL</label>
                     <input type="text" id="m3uUrlBox" placeholder="https://site.com">
                 </div>
-                <button class="action-blue" onclick="startM3ULoad()">Kanalları Yükle</button>
+                <button class="action-blue" id="btnM3u" onclick="startM3ULoad()">Kanalları Yükle</button>
             </div>
 
             <div class="config-card">
@@ -269,16 +257,15 @@
                         <input type="password" id="xtreamPassBox" placeholder="Password">
                     </div>
                 </div>
-                <button class="action-green" onclick="startXtreamLoad()">Yükle</button>
+                <button class="action-green" id="btnXtream" onclick="startXtreamLoad()">Yükle</button>
             </div>
         </div>
 
-        <div id="statusAlert" class="status-badge"></div>
+        <div id="statusAlert" class="status-badge">Sistem Hazır. Bilgilerinizi girip butona basın.</div>
 
-        <!-- Oynatıcı Alanları -->
         <div class="panel-layout">
             <div class="media-box">
-                <video id="carVideoView" controls autoplay playsinline></video>
+                <video id="carVideoView" controls autoplay></video>
                 <div class="media-title" id="lblPlaying">
                     Kanal: <span style="color: #60a5fa;">Seçilmedi</span>
                 </div>
@@ -291,43 +278,54 @@
                 </div>
                 <input type="text" id="txtSearch" oninput="runSearch()" placeholder="Kanal ismi ara...">
                 <div class="channels-list" id="domChannelList">
-                    <div class="blank-text">Listenizi yüklediğinizde kanallar burada listelenir.</div>
+                    <div class="blank-text">Kanallar burada listelenecek.</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let loadedChannels = [];
-        const mainVideo = document.getElementById('carVideoView');
+        var loadedChannels = [];
+        var mainVideo = document.getElementById('carVideoView');
 
         function printStatus(msg, mode) {
-            const el = document.getElementById('statusAlert');
+            var el = document.getElementById('statusAlert');
             el.innerText = msg;
-            el.style.display = 'block';
             if (mode === 'err') {
                 el.style.borderColor = '#ef4444';
                 el.style.color = '#fca5a5';
-                el.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                el.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
             } else if (mode === 'ok') {
                 el.style.borderColor = '#10b981';
                 el.style.color = '#a7f3d0';
-                el.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                el.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
             } else {
                 el.style.borderColor = '#3b82f6';
                 el.style.color = '#93c5fd';
-                el.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                el.style.backgroundColor = 'rgba(59, 130, 246, 0.15)';
             }
         }
 
-        async function startM3ULoad() {
-            const rawUrl = document.getElementById('m3uUrlBox').value.trim();
-            if (!rawUrl) return alert('Lütfen linkinizi yazın.');
+        function startM3ULoad() {
+            var rawUrl = document.getElementById('m3uUrlBox').value.trim();
+            if (!rawUrl) {
+                alert('Lütfen linkinizi yazın.');
+                return;
+            }
 
-            printStatus('Bağlantı tüneli kuruluyor (Yöntem 1)...', 'wait');
+            printStatus('Güvenli bağlantı tüneli kuruluyor, lütfen bekleyin...', 'wait');
 
-            // Çözüm Havuzu 1: Tarayıcı engelini aşan güvenli tünel
-            try {
-                const gateway1 = 'https://corsproxy.io?' + encodeURIComponent(rawUrl);
-                const resp = await fetch(gateway1);
-                const txt = await resp.text();
+            // URL içindeki tüm tehlikeli karakterleri tarayıcı filtresinden gizler
+            var cleanUrl = encodeURIComponent(rawUrl);
+            var gateway = 'https://allorigins.win' + cleanUrl;
+
+            // Arka plandaki tüm kilitlenmeleri aşan izole istek mimarisi
+            fetch(gateway)
+                .then(function(res) { 
+                    if (!res.ok) throw new Error('Ağ hatası');
+                    return res.json(); 
+                })
+                .then(function(json) {
+                    if (json && json.contents && json.contents.trim().length > 0) {
+                        buildList(json.contents);
+                    } else {
